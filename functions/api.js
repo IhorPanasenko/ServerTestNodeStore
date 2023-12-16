@@ -1,8 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const serverless = require('serverless-http')
-const LiqPay = require("liqpay")
+const serverless = require("serverless-http");
+const LiqPay = require("liqpay");
 
 const app = express();
 const privateKey = "sandbox_3KjYIs5D9uMyI63tMcVqIYkQc8YTxRqgcMimTTQ2";
@@ -41,8 +41,8 @@ app.use(cors({ origin: "*" }));
 
 const router = express.Router();
 
-router.get('/', (req, res)=>{
-    res.send('App is running...')
+router.get("/", (req, res) => {
+  res.send("App is running...");
 });
 
 // Endpoint to get all products
@@ -76,41 +76,22 @@ const sumOfProducts = () => {
   return sum;
 };
 
-function base64_encode(data) {
-  if (typeof btoa === "function") {
-    // For browsers supporting btoa
-    return btoa(unescape(encodeURIComponent(data)));
-  } else if (typeof Buffer === "function") {
-    // For Node.js or environments supporting Buffer
-    return Buffer.from(data).toString("base64");
-  } else {
-    throw new Error(
-      "base64_encode: Unsupported environment, neither btoa nor Buffer is available."
-    );
-  }
-}
-
-const crypto = require('crypto');
-
-function sha1Binary(input) {
-  const hash = crypto.createHash('sha1');
-  hash.update(input);
-  return hash.digest('base64');
-}
+const crypto = require("crypto");
 
 function str_to_sign(str) {
-  if (typeof str !== 'string') {
-      throw new Error('Input must be a string');
+  if (typeof str !== "string") {
+    throw new Error("Input must be a string");
   }
 
-  const sha1 = crypto.createHash('sha1');
+  const sha1 = crypto.createHash("sha1");
   sha1.update(str);
-  return sha1.digest('base64');
-};
+  return sha1.digest("base64");
+}
 
 function generateRandomString(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let randomString = '';
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let randomString = "";
 
   for (let i = 0; i < length; i++) {
     const randomIndex = crypto.randomInt(characters.length);
@@ -133,15 +114,16 @@ router.post("/payment/initiate", (req, res) => {
     currency: "UAH",
     description: "test",
     order_id: orderId,
-    server_url: "https://serverstoretest.netlify.app/.netlify/functions/api/payment-callback",
+    server_url:
+      "https://serverstoretest.netlify.app/.netlify/functions/api/payment-callback",
   };
 
   console.log(JSON.stringify(json_string));
-  const data = Buffer.from(JSON.stringify(json_string)).toString('base64')
-  const sign_signature = privateKey+data+privateKey;
+  const data = Buffer.from(JSON.stringify(json_string)).toString("base64");
+  const sign_signature = privateKey + data + privateKey;
   console.log(sign_signature);
-  const signature = str_to_sign(privateKey+data+privateKey);
-  console.log(signature)
+  const signature = str_to_sign(privateKey + data + privateKey);
+  console.log(signature);
 
   const responseData = {
     data: data,
@@ -155,10 +137,26 @@ router.post("/payment/initiate", (req, res) => {
 
 // Endpoint for LiqPay callback
 router.post("/payment-callback", (req, res) => {
-  console.log("Payment callback received:", req);
+  const data = req.data;
+  const signature = req.signature;
+  const calculated_sign = str_to_sign(privateKey + data + privateKey);
+
+  if (calculated_sign === signature) {
+    console.log("Payment callback received:", req);
+    for (var i = 0; i < cart.length; i++) {
+      for (var j = 0; j < products.length; ++j) {
+        if (products[j].id == cart[i].id) {
+          products[i].inSaleAmount -= 1;
+        }
+      }
+    }
+
+    decoded_data = 
+  }
+
+  cart = [];
   res.send("OK");
 });
 
-
-app.use('/.netlify/functions/api', router)
-module.exports.handler = serverless(app)
+app.use("/.netlify/functions/api", router);
+module.exports.handler = serverless(app);
