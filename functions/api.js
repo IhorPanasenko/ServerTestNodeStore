@@ -150,8 +150,6 @@ router.post("/payment-callback", (req, res) => {
         }
       }
     }
-
-    decoded_data = 
   }
 
   cart = [];
