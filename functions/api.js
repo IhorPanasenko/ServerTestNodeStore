@@ -48,7 +48,6 @@ router.get('/', (req, res)=>{
 // Endpoint to get all products
 router.get("/products/getall", (req, res) => {
   res.json(products);
-  return res.status(200);
 });
 
 // Endpoint to add a product to the cart
