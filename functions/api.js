@@ -133,7 +133,7 @@ router.post("/payment/initiate", (req, res) => {
     currency: "UAH",
     description: "test",
     order_id: orderId,
-    server_url: "https://serverstoretest.netlify.app/payment-callback",
+    server_url: "https://serverstoretest.netlify.app/.netlify/functions/api/payment-callback",
   };
 
   console.log(JSON.stringify(json_string));
