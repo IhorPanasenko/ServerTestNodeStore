@@ -1,13 +1,12 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const serverless = require('serverless-http')
 const LiqPay = require("liqpay")
 
 const app = express();
 const privateKey = "sandbox_3KjYIs5D9uMyI63tMcVqIYkQc8YTxRqgcMimTTQ2";
 const publicKey = "sandbox_i38174082832";
-const port = 3001;
-app.use(cors({ origin: "*" }));
 
 // Predefined in-memory data for products
 const products = [
@@ -38,15 +37,22 @@ const products = [
 let cart = [];
 
 app.use(bodyParser.json());
+app.use(cors({ origin: "*" }));
+
+const router = express.Router();
+
+router.get('/', (req, res)=>{
+    res.send('App is running...')
+});
 
 // Endpoint to get all products
-app.get("/api/products/getall", (req, res) => {
+router.get("/products/getall", (req, res) => {
   res.json(products);
   return res.status(200);
 });
 
 // Endpoint to add a product to the cart
-app.post("/api/products/addtocart", (req, res) => {
+router.post("/products/addtocart", (req, res) => {
   const productId = req.body.productId;
   const product = products.find((p) => p.id === productId);
 
@@ -59,7 +65,7 @@ app.post("/api/products/addtocart", (req, res) => {
 });
 
 // Endpoint to get all products in the cart
-app.get("/api/products/cart", (req, res) => {
+router.get("/products/cart", (req, res) => {
   res.json(cart);
 });
 
@@ -115,7 +121,7 @@ function generateRandomString(length) {
   return randomString;
 }
 
-app.post("/api/payment/initiate", (req, res) => {
+router.post("/payment/initiate", (req, res) => {
   const amount = sumOfProducts();
 
   let newNumber = Number(amount.toFixed(2));
@@ -128,7 +134,7 @@ app.post("/api/payment/initiate", (req, res) => {
     currency: "UAH",
     description: "test",
     order_id: orderId,
-    server_url: "http://127.0.0.1:3001/payment-callback",
+    server_url: "https://serverstoretest.netlify.app/payment-callback",
   };
 
   console.log(JSON.stringify(json_string));
@@ -149,12 +155,15 @@ app.post("/api/payment/initiate", (req, res) => {
 });
 
 // Endpoint for LiqPay callback
-app.post("/payment-callback", (req, res) => {
+router.post("/payment-callback", (req, res) => {
   console.log("Payment callback received:", req);
   res.send("OK");
 });
 
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
+app.use('./netlify/functions/api', router)
+module.exports.handler = serverless(app)
+
+// app.listen(port, () => {
+//   console.log(`Server is running at http://localhost:${port}`);
+// });
