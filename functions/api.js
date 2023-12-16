@@ -8,7 +8,6 @@ const app = express();
 const privateKey = "sandbox_3KjYIs5D9uMyI63tMcVqIYkQc8YTxRqgcMimTTQ2";
 const publicKey = "sandbox_i38174082832";
 
-// Predefined in-memory data for products
 const products = [
   {
     id: 1,
@@ -33,7 +32,6 @@ const products = [
   },
 ];
 
-// In-memory data for the shopping cart
 let cart = [];
 
 app.use(bodyParser.json());
@@ -45,12 +43,10 @@ router.get("/", (req, res) => {
   res.send("App is running...");
 });
 
-// Endpoint to get all products
 router.get("/products/getall", (req, res) => {
   res.json(products);
 });
 
-// Endpoint to add a product to the cart
 router.post("/products/addtocart", (req, res) => {
   const productId = req.body.productId;
   const product = products.find((p) => p.id === productId);
@@ -63,7 +59,6 @@ router.post("/products/addtocart", (req, res) => {
   res.json({ message: "Product added to cart", cart });
 });
 
-// Endpoint to get all products in the cart
 router.get("/products/cart", (req, res) => {
   res.json(cart);
 });
@@ -135,19 +130,12 @@ router.post("/payment/initiate", (req, res) => {
   res.json(responseData);
 });
 
-// Endpoint for LiqPay callback
 router.post("/payment-callback", (req, res) => {
-  const data = req.data;
-  const signature = req.signature;
-  const calculated_sign = str_to_sign(privateKey + data + privateKey);
-
-  if (calculated_sign === signature) {
-    console.log("Payment callback received:", req);
-    for (var i = 0; i < cart.length; i++) {
-      for (var j = 0; j < products.length; ++j) {
-        if (products[j].id == cart[i].id) {
-          products[i].inSaleAmount -= 1;
-        }
+ 
+  for (var i = 0; i < cart.length; i++) {
+    for (var j = 0; j < products.length; ++j) {
+      if (products[j].id === cart[i].id) {
+        products[i].inSaleAmount -= 1;
       }
     }
   }
