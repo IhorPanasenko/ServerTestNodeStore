@@ -163,7 +163,3 @@ router.post("/payment-callback", (req, res) => {
 
 app.use('/.netlify/functions/api', router)
 module.exports.handler = serverless(app)
-
-// app.listen(port, () => {
-//   console.log(`Server is running at http://localhost:${port}`);
-// });

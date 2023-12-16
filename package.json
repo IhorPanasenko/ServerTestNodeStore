@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "netlify deploy --local",
+    "start": "./node_modules/.bin/netlify-lambda serve src",
     "build": "netlify deploy --prod"
   },
   "engines": {
